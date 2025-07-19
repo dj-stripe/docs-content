@@ -1,0 +1,90 @@
+name: Sync Documentation from Main Repository
+
+on:
+  repository_dispatch:
+    types: [sync-docs]
+
+jobs:
+  sync-documentation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout docs-content repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout source repository
+        uses: actions/checkout@v4
+        with:
+          repository: dj-stripe/dj-stripe
+          ref: ${{ github.event.client_payload.source_sha }}
+          path: source-repo
+
+      - name: Sync documentation files
+        run: |
+          ./scripts/sync-docs.sh \
+            "${{ github.event.client_payload.version }}" \
+            "${{ github.event.client_payload.source_ref }}" \
+            "${{ github.event.client_payload.source_sha }}"
+
+      - name: Update version tracking for stable releases
+        if: github.event.client_payload.version != 'dev'
+        run: |
+          VERSION="${{ github.event.client_payload.version }}"
+
+          # Initialize or read versions
+          if [ -f "versions.json" ]; then
+            VERSIONS=$(cat versions.json | jq -r '.versions[]' | grep -E '^[0-9]+\.[0-9]+$' | sort -V)
+          else
+            VERSIONS=""
+          fi
+
+          # Add current version if not present
+          if ! echo "$VERSIONS" | grep -q "^${VERSION}$"; then
+            VERSIONS=$(echo -e "${VERSIONS}\n${VERSION}" | grep -v '^$' | sort -V)
+          fi
+
+          # Update versions.json
+          echo '{"versions": [' > versions.json
+          echo "$VERSIONS" | awk '{printf "%s\"%s\"", (NR>1?",\n  ":"  "), $0}' >> versions.json
+          echo -e '\n], "latest": "'$(echo "$VERSIONS" | tail -1)'"}' >> versions.json
+
+          # Update LATEST file
+          echo "$VERSIONS" | tail -1 > LATEST
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+          # Clean up the source-repo directory before committing
+          rm -rf source-repo
+
+          git add .
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          VERSION="${{ github.event.client_payload.version }}"
+          COMMIT_MSG="Update ${VERSION} docs from dj-stripe/dj-stripe@${{ github.event.client_payload.source_sha }}"
+
+          if [[ "${VERSION}" != "dev" ]]; then
+            COMMIT_MSG="$COMMIT_MSG (stable release)"
+          fi
+
+          git commit -m "$COMMIT_MSG"
+          git push
+
+      - name: Trigger website rebuild
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: dj-stripe/dj-stripe.github.io
+          event-type: docs-updated
+          client-payload: |
+            {
+              "version": "${{ github.event.client_payload.version }}",
+              "source_commit": "${{ github.event.client_payload.source_sha }}"
+            }

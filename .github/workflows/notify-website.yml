@@ -1,0 +1,14 @@
+name: Notify Website of Updates
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log update
+        run: |
+          echo "Documentation updated in docs-content repository"
+          echo "The dj-stripe.github.io website will detect this change and rebuild"
