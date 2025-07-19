@@ -1,7 +1,6 @@
 # dj-stripe - Django + Stripe Made Easy
 
 [![Stripe Verified Partner](https://img.shields.io/static/v1?label=Stripe&message=Verified%20Partner&color=red&style=for-the-badge)](https://stripe.com/docs/libraries#community-libraries)
-<br/>
 
 [![CI tests](https://github.com/dj-stripe/dj-stripe/actions/workflows/ci.yml/badge.svg)](https://github.com/dj-stripe/dj-stripe/actions/workflows/ci.yml)
 [![Package Downloads](https://img.shields.io/pypi/dm/dj-stripe)](https://pypi.org/project/dj-stripe/)
@@ -46,17 +45,9 @@ See [installation](https://dj-stripe.dev/docs/latest/installation/) instructions
 
 [See release notes](https://dj-stripe.dev/changes).
 
-<!-- This link *will* get stale again eventually. There should be an index page for the
-     changelog that can be linked to.
-
-     For example:
-     https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#section-index-pages -->
-
 ## Funding and Support
 
-<a href="https://stripe.com">
-  <img alt="Funded by Stripe" src="./logos/stripe_blurple.svg" width="250px" />
-</a>
+[![Funded by Stripe](./logos/stripe_blurple.svg)](https://stripe.com)
 
 You can now become a sponsor to dj-stripe with [GitHub Sponsors](https://github.com/sponsors/dj-stripe).
 
