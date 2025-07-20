@@ -32,10 +32,9 @@ From now on, whenever you make changes on the Stripe Dashboard,
 the webhook endpoint you specified with `--forward-to` will called
 with the respective changes.
 
-!!! hint
-    If the webhook secret is not passed to dj-stripe,
-    signature validation will fail with an HTTP status code 400
-    and the message "Failed to verify header".
+*HINT*: If the webhook secret is not passed to dj-stripe,
+signature validation will fail with an HTTP status code 400
+and the message "Failed to verify header".
 
 Stripe events can now be triggered like so:
 
